@@ -12,7 +12,7 @@ const documentSchema = new mongoose.Schema({
     },
     createdAt: {
         required: true,
-        type: Number
+        type: Number,
     },
     title: {
         required: true,

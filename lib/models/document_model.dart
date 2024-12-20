@@ -17,7 +17,7 @@ class DocumentModel {
   
 
   Map<String, dynamic> toMap() {
-    return <String, dynamic>{
+    return {
       'title': title,
       'uid': uid,
       'content': content,
@@ -30,7 +30,7 @@ class DocumentModel {
     return DocumentModel(
       title: map['title'] ??  '',
       uid: map['uid'] ??  '',
-      content: List.from(map['content'] ?? []),
+      content: List.from(map['contents'] ?? []),
       createdAt: DateTime.fromMillisecondsSinceEpoch(map['createdAt'] ),
       id: map['_id']  ?? ' ',
     );
@@ -38,5 +38,5 @@ class DocumentModel {
 
   String toJson() => json.encode(toMap());
 
-  factory DocumentModel.fromJson(String source) => DocumentModel.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory DocumentModel.fromJson(String source) => DocumentModel.fromMap(json.decode(source) );
 }
