@@ -19,7 +19,7 @@ const documentSchema = new mongoose.Schema({
         type: String,
         trim:true
     },
-    contents: {
+    content: {
         type: Array,
         default: [],
     }

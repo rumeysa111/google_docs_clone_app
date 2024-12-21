@@ -39,12 +39,12 @@ class DocumentRepository {
         case 200:
           error = ErrorModel(
             error: null,
-            data: DocumentModel.fromJson(jsonDecode(res.body)),
+            data: DocumentModel.fromJson(res.body),
           );
           break;
         default:
           error = ErrorModel(
-            error: res.body,
+            error: 'failed to create documetn: ${res.body}',
             data: null,
           );
           break;
@@ -57,73 +57,44 @@ class DocumentRepository {
     }
     return error;
   }
-Future<ErrorModel> getDocuments(String token) async {
+  Future<ErrorModel> getDocuments(String token) async{
+    ErrorModel error=ErrorModel(error: 'some unexpected error occured', data: null);
+    try {
+      var res=await _client.get(Uri.parse('$host/docs/me'),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'x-auth-token': token,},
+      ); 
+      switch (res.statusCode){
+        case 200:
+        List<DocumentModel> documents=[];
+        for(int i=0;i<jsonDecode(res.body).length;i++){
+          documents.add(DocumentModel.fromJson(jsonEncode(jsonDecode(res.body)[i])));
+
+        }
+        error=ErrorModel(error: null, data: documents);
+        break;
+        default:
+        error=ErrorModel(error: res.body, data: null);
+        break;
+      }
+    } catch (e) {
+      error=ErrorModel(error: e.toString(), data: null);
+      }return error;
+  }
+
+
+Future<ErrorModel> updateTitle({
+  required String token,
+  required String id,
+  required String title,
+}) async {
   ErrorModel error = ErrorModel(
     error: 'Some unexpected error occurred.',
     data: null,
   );
   try {
-    print('Sending GET request to: $host/docs/me with token: $token');
-    
-    var res = await _client.get(
-      Uri.parse('$host/docs/me'),
-      headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-        'x-auth-token': token,
-      },
-    );
-
-    print('Response status code: ${res.statusCode}');
-    print('Response body: ${res.body}');
-    
-    switch (res.statusCode) {
-      case 200:
-        List<DocumentModel> documents = [];
-
-        var decoded = jsonDecode(res.body);
-        
-        if (decoded is List) {
-          print('Decoded response is a List');
-          for (var doc in decoded) {
-            documents.add(DocumentModel.fromJson(doc));
-          }
-        } else {
-          print('Decoded response is not a List');
-          // Handle the case where the response is not a list
-          error = ErrorModel(
-            error: 'Unexpected data structure received.',
-            data: null,
-          );
-        }
-
-        error = ErrorModel(
-          error: null,
-          data: documents,
-        );
-        break;
-      default:
-        error = ErrorModel(
-          error: res.body,
-          data: null,
-        );
-        break;
-    }
-  } catch (e) {
-    print('Error occurred: $e');
-    error = ErrorModel(
-      error: e.toString(),
-      data: null,
-    );
-  }
-  return error;
-}
-
-  void updateTitle({
-    required String token,
-    required String id,
-    required String title,
-  }) async {
-    await _client.post(
+    var res = await _client.post(
       Uri.parse('$host/doc/title'),
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
@@ -134,7 +105,34 @@ Future<ErrorModel> getDocuments(String token) async {
         'id': id,
       }),
     );
+
+    switch (res.statusCode) {
+      case 200:
+        error = ErrorModel(
+          error: null,
+          data: jsonDecode(res.body),
+        );
+        print('Title updated successfully: $title');
+        break;
+      default:
+        error = ErrorModel(
+          error: 'Failed to update title: ${res.body}',
+          data: null,
+        );
+        print('Failed to update title: ${res.body}');
+        break;
+    }
+  } catch (e) {
+    error = ErrorModel(
+      error: e.toString(),
+      data: null,
+    );
+    print('Error updating title: $e');
   }
+  return error;
+}
+
+  
 
   Future<ErrorModel> getDocumentById(String token, String id) async {
     ErrorModel error = ErrorModel(

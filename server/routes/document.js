@@ -31,16 +31,18 @@ documentRouter.post('/doc/create', auth, async (req, res) => {
 
 documentRouter.get('/docs/me', auth, async (req, res) => {
     try {
-        console.log(`Gelen istek: ${req.method} ${req.url}`);
-
         let documents = await Document.find({ uid: req.user });
-        console.log('Kullanıcı belgeleri:', documents);
+        if (!documents || documents.length === 0) {
+            return res.status(404).json({ error: 'No documents found for this user.' });
+        }
         res.json(documents);
     } catch (e) {
-        console.error('Hata:', e.message);
-        res.status(500).json({ error: e.message });
+        console.error('Belge sorgulama hatası:', e.message);
+        res.status(500).json({ error: 'Internal server error. Please try again later.' });
     }
 });
+
+
 
 // Belge başlığını güncelleme
 documentRouter.post('/doc/title', auth, async (req, res) => {
@@ -58,7 +60,7 @@ documentRouter.post('/doc/title', auth, async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
-documentRouter.get('/docs/:id', auth, async (req, res) => {
+documentRouter.get('/doc/:id', auth, async (req, res) => {
     try {
         console.log(`Gelen istek: ${req.method} ${req.url}`);
         const documents = await Document.findById(req.params.id);

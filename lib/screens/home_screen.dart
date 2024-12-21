@@ -62,7 +62,7 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: FutureBuilder(
+      body: FutureBuilder<ErrorModel>(
         future: ref.watch(documentRepositoryProvider).getDocuments(
               ref.watch(userProvider)!.token,
             ),
@@ -71,35 +71,42 @@ class HomeScreen extends ConsumerWidget {
             return const Loader();
           }
 
-          return Center(
-            child: Container(
-              width: 600,
-              margin: const EdgeInsets.only(top: 10),
-              child: ListView.builder(
-                itemCount: snapshot.data!.data.length,
-                itemBuilder: (context, index) {
-                  DocumentModel document = snapshot.data!.data[index];
+          if (snapshot.hasError || snapshot.data?.error != null) {
+            return Center(
+              child: Text(
+                'Error: ${snapshot.data?.error ?? 'Unknown error occurred.'}',
+              ),
+            );
+          }
 
-                  return InkWell(
-                    onTap: () => navigateToDocument(context, document.id),
-                    child: SizedBox(
-                      height: 50,
-                      child: Card(
-                        child: Center(
-                          child: Text(
-                            document.title,
-                            style: const TextStyle(
-                              fontSize: 17,
-                            ),
-                          ),
-                        ),
+          if (snapshot.hasData && snapshot.data!.data != null) {
+            List<DocumentModel> documents = snapshot.data!.data;
+            return ListView.builder(
+              itemCount: documents.length,
+              itemBuilder: (context, index) {
+                DocumentModel document = documents[index];
+                return InkWell(
+                  onTap: () => navigateToDocument(context, document.id),
+                  child: SizedBox(
+                    height: 50,
+                    child: Card(
+                      child: Center(
+                        child: Text(document.title,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),),
                       ),
                     ),
-                  );
-                },
-              ),
-            ),
-          );
+                 
+                    
+                  ),
+                );
+              },
+            );
+          }
+
+          return const Center(child: Text('No documents found.'));
         },
       ),
     );

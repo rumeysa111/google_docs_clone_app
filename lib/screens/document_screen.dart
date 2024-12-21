@@ -23,7 +23,7 @@ class DocumentScreen extends ConsumerStatefulWidget {
 
 class _DocumentScreenState extends ConsumerState<DocumentScreen> {
   TextEditingController _controller =
-  TextEditingController(text: "Untitled Document");
+      TextEditingController(text: "Untitled Document");
   quill.QuillController? quillController = quill.QuillController.basic();
   ErrorModel? errorModel;
 
@@ -49,15 +49,11 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
       });
     });
   }
-  
+
   void fetchDocumentData() async {
     errorModel = await ref
         .read(documentRepositoryProvider)
         .getDocumentById(ref.read(userProvider)!.token, widget.id);
-  if (errorModel == null || errorModel!.error != null) {
-    print("Hata: ${errorModel?.error}");
-    return;
-  }
 
     if (errorModel!.data != null) {
       _controller.text = (errorModel!.data as DocumentModel).title;
@@ -65,13 +61,14 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
         document: errorModel!.data.content.isEmpty
             ? quill.Document()
             : quill.Document.fromDelta(
-            Delta.fromJson(errorModel!.data.content)),
+                Delta.fromJson(errorModel!.data.content)),
         selection: const TextSelection.collapsed(offset: 0),
       );
       setState(() {});
     }
     quillController!.document.changes.listen((event) {
-      final change = event.change; // Yeni API'de değişiklik verilerini buradan alın.
+      final change =
+          event.change; // Yeni API'de değişiklik verilerini buradan alın.
       final source = event.source; // Değişikliğin kaynağını alın.
 
       if (source == quill.ChangeSource.local) {
@@ -90,12 +87,51 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
     _controller.dispose();
   }
 
-  void updateTitle(WidgetRef ref, String title) {
-    ref.read(documentRepositoryProvider).updateTitle(
-      token: ref.read(userProvider)!.token,
-      id: widget.id,
-      title: title,
-    );
+  void updateTitle(WidgetRef ref, String title) async {
+    final token = ref.read(userProvider)?.token;
+
+    // Token kontrolü
+    if (token == null) {
+      print("Error: User token is null. Cannot update title.");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error: Unable to update title.')),
+      );
+      return;
+    }
+
+    print("Updating title for document ID: ${widget.id} with title: $title");
+
+    try {
+      // Başlık güncelleme işlemi
+      final result = await ref.read(documentRepositoryProvider).updateTitle(
+            token: token,
+            id: widget.id,
+            title: title,
+          );
+
+      // Başarılı yanıt kontrolü
+      if (result.error == null) {
+        print("Title updated successfully to: $title");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Title updated successfully!')),
+        );
+        setState(() {
+          _controller.text = title;
+        });
+      } else {
+        // Hata durumunda mesaj
+        print("Error updating title: ${result.error}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error updating title: ${result.error}')),
+        );
+      }
+    } catch (e) {
+      // Beklenmeyen hata durumu
+      print("Unexpected error while updating title: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
   }
 
   @override
@@ -115,7 +151,7 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
             child: ElevatedButton.icon(
               onPressed: () {
                 Clipboard.setData(ClipboardData(
-                    text: 'http://localhost:3001/#/document/${widget.id}'))
+                        text: 'http://localhost:3001/#/document/${widget.id}'))
                     .then((value) {
                   ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Link copied to clipboard')));
@@ -144,7 +180,7 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
                     Routemaster.of(context).replace('/');
                   },
                   child:
-                  Image.asset('assets/images/docs-logo.png', height: 40)),
+                      Image.asset('assets/images/docs-logo.png', height: 40)),
               const SizedBox(width: 10),
               SizedBox(
                 width: 200,
@@ -157,7 +193,11 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
                     ),
                     contentPadding: EdgeInsets.only(left: 10),
                   ),
-                  onSubmitted: (value) => updateTitle(ref, value),
+                  onSubmitted: (value) {
+                    print("TextField submitted with value: $value");
+
+                    updateTitle(ref, value);
+                  },
                 ),
               )
             ],
@@ -200,5 +240,4 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
       ),
     );
   }
-
 }
