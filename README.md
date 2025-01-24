@@ -17,7 +17,7 @@ Google Docs Clone App is a responsive and cross-platform application that allows
 
 ## Technologies
 - **Frontend:** Flutter
-- **Backend:** Node.js, Express.js
+- **Backend:** Node.js, Express.js (Located in the server folder)
 - **Database:** MongoDB
 - **State Management:** Riverpod
 - **Real-Time Operations:** Socket.IO
