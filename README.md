@@ -1,17 +1,24 @@
-# docs_clone_flutter
+# Google Docs Clone App
 
-A new Flutter project.
+## About the Project
+Google Docs Clone App is a responsive and cross-platform application that allows users to manage and edit their documents. The application features a frontend built with Flutter and a backend powered by Node.js. This project provides a collaborative platform where users can work together on documents in real time.
 
-## Getting Started
+## Features
+- **User Authentication:** Google Authentication (without Firebase).
+- **Session Management:** Keeps users logged in seamlessly.
+- **Document Management:**
+  - Create new documents.
+  - View the list of documents created by the user.
+  - Update document titles.
+  - Share document links.
+- **Rich Text Editor:** Offers an advanced editing experience for documents.
+- **Real-Time Collaboration:** Enables users to collaboratively edit documents.
+- **Responsive Design:** Delivers a user-friendly experience on mobile, tablet, and desktop devices.
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-# google_docs_clone_app
+## Technologies
+- **Frontend:** Flutter
+- **Backend:** Node.js, Express.js
+- **Database:** MongoDB
+- **State Management:** Riverpod
+- **Real-Time Operations:** Socket.IO
+- **Design:** Responsive design optimized for all devices.
